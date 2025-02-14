@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Falling Hearts Animation</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            height: 100%;
+            background: linear-gradient(to bottom, #ff7eb9, #ff758c);
+        }
+
+        canvas {
+            display: block;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        .background-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 3rem;
+            color: white;
+            font-family: 'Arial', sans-serif;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            z-index: 1;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="heartCanvas"></canvas>
+    <div class="background-text">Head Sõbrapäeva</div>
+    <script>
+        const canvas = document.getElementById('heartCanvas');
+        const ctx = canvas.getContext('2d');
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const hearts = [];
+        const gravity = 0.1;
+        const heartSize = 30;
+
+        class Heart {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.vy = 0; // Vertical velocity
+                this.size = Math.random() * heartSize + 10;
+            }
+
+            draw() {
+                ctx.save();
+                ctx.translate(this.x, this.y);
+                ctx.scale(this.size / 50, this.size / 50);
+                ctx.fillStyle = '#ff6b6b';
+                ctx.beginPath();
+                ctx.moveTo(0, 0);
+                ctx.bezierCurveTo(-25, -25, -50, 0, 0, 50);
+                ctx.bezierCurveTo(50, 0, 25, -25, 0, 0);
+                ctx.fill();
+                ctx.restore();
+            }
+
+            update() {
+                this.vy += gravity; // Apply gravity
+                this.y += this.vy; // Move the heart downwards
+
+                // Bounce back if the heart hits the bottom
+                if (this.y + this.size / 2 > canvas.height) {
+                    this.y = canvas.height - this.size / 2;
+                    this.vy *= -0.8; // Dampen the bounce
+                }
+
+                this.draw();
+            }
+        }
+
+        function createHeart() {
+            const x = Math.random() * canvas.width;
+            const y = -heartSize; // Start above the canvas
+            hearts.push(new Heart(x, y));
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Add a new heart at random intervals
+            if (Math.random() < 0.1) {
+                createHeart();
+            }
+
+            // Update and draw all hearts
+            hearts.forEach((heart, index) => {
+                heart.update();
+                // Remove hearts that fall off the screen
+                if (heart.y - heart.size / 2 > canvas.height) {
+                    hearts.splice(index, 1);
+                }
+            });
+
+            requestAnimationFrame(animate);
+        }
+
+        animate();
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+    </script>
+</body>
+</html>
